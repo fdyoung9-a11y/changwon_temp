@@ -1,1 +1,19 @@
 /venv
+
+# Project backup files
+changwon_analysis_*backup.ipynb
+changwon_analysis_before_*.ipynb
+REPORT_before_*.md
+README_before_*.md
+AI_USAGE_LOG_backup.md
+
+# Verification and temporary notebook files
+changwon_analysis_verified.ipynb
+changwon_analysis_before_*.ipynb
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter checkpoints
+.ipynb_checkpoints/

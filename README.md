@@ -37,3 +37,35 @@
 ```bash
 # Windows
 venv\Scripts\activate
+
+## GitHub Repository and Project Files
+
+### Repository
+- [GitHub Repository](https://github.com/fdyoung9-a11y/changwon_temp)
+
+### Main Files
+- [Analysis Notebook](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/changwon_analysis.ipynb)
+- [Analysis Report](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/REPORT.md)
+- [README](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/README.md)
+- [Original Temperature Dataset](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/data/changwon_temp.csv)
+
+### Visualization Files
+- [Yearly Temperature Trend](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/01_yearly_trend.png)
+- [Monthly Temperature Pattern](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/02_monthly_pattern.png)
+- [Year-Month Heatmap](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/03_heatmap.png)
+- [Moving Average Analysis](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/04_moving_average.png)
+- [Seasonal Decomposition](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/05_seasonal_decomposition.png)
+- [Period and Aggregation Comparison](https://github.com/fdyoung9-a11y/changwon_temp/blob/main/images/06_period_aggregation.png)
+
+### Data Source
+- Korea Meteorological Administration (KMA)
+- [KMA Open Data Portal](https://data.kma.go.kr/)
+- Station: Changwon (155)
+- Daily temperature observations: 2000-2026
+
+### Reproducibility
+- Run the Jupyter Notebook from the project root directory.
+- Required tools include pandas, numpy, matplotlib,
+  seaborn, and statsmodels.
+- Some image links will become available after
+  all new files are committed and pushed.
