@@ -124,222 +124,275 @@ pip install -r requirements.txt
 
 # 3. 노트북 실행
 jupyter notebook changwon_analysis.ipynb
+```
 
 
-## 9. Data Quality and Outlier Handling
+## 9. 데이터 품질 검증 및 이상치 처리
 
-### Missing Values
-- Total observations: 9,788
-- Missing mean temperature: 0
-- Missing minimum temperature: 1
-- Missing maximum temperature: 1
-- Decision: Preserve original data. Handle missing values only when analyzing the affected columns.
+### 결측치 확인
 
-### Logical Validation
-- Rule: Minimum temperature <= Mean temperature <= Maximum temperature.
-- Result: 0 invalid rows among complete observations.
-- Decision: No deletion required based on logical consistency.
+- **전체 관측 데이터:** 9,788개
+- **평균기온 결측치:** 0개
+- **최저기온 결측치:** 1개
+- **최고기온 결측치:** 1개
+- **처리 기준:** 원본 데이터는 보존하고, 결측치가 포함된 변수를 분석할 때만 해당 결측값을 처리하였다.
 
-### Statistical Outliers
-- Method: Monthly IQR (Interquartile Range).
-- Lower bound: Q1 - 1.5 * IQR.
-- Upper bound: Q3 + 1.5 * IQR.
-- Result: 75 candidate outliers (approximately 0.77%).
-- Decision: Retain all candidate outliers for the current analysis.
+### 데이터 논리적 검증
 
-### Rationale
-Temperature data are seasonal. Extreme observations may reflect real heatwaves or cold spells.
-Removing statistically unusual observations without verifying measurement errors could distort long-term climate trends.
-Therefore, statistical outliers are flagged but not automatically removed.
+- **검증 조건:** 최저기온 ≤ 평균기온 ≤ 최고기온
+- **검증 결과:** 세 기온 값이 모두 존재하는 관측값에서 논리적 오류 0개를 확인하였다.
+- **처리 결과:** 기온의 논리적 일관성을 기준으로 삭제해야 할 데이터는 발견되지 않았다.
 
-## 10. Moving Average Analysis
+### 통계적 이상치 검증
 
-### Purpose
-Identify long-term temperature patterns while reducing short-term fluctuations.
+- **분석 방법:** 월별 IQR(사분위범위) 방법
+- **이상치 하한:** Q1 - 1.5 × IQR
+- **이상치 상한:** Q3 + 1.5 × IQR
+- **분석 결과:** 이상치 후보 75개(전체 관측값의 약 0.77%)
+- **처리 기준:** 통계적 이상치 후보를 자동으로 삭제하지 않고 분석 데이터에 유지하였다.
 
-### Methods
-- 30-day simple moving average (SMA): smooths short-term daily variation.
-- 365-day SMA: reduces annual seasonal fluctuations to reveal longer-term patterns.
-- Full windows of 30 and 365 observations were required.
-- Original daily observations and statistical outlier candidates were retained.
+### 이상치를 유지한 이유
 
-### Results
-- Total daily observations: 9,788
-- Valid 30-day SMA values: 9,759
-- Valid 365-day SMA values: 9,424
-- On 2026-10-18:
-  - Daily mean temperature: 21.90 C
-  - 30-day SMA: 20.99 C
-  - 365-day SMA: 15.96 C
+기온 데이터는 계절적 특성을 가지므로 일반적인 범위에서 벗어난 관측값이 실제 폭염이나 한파를 나타낼 수 있다.
 
-![Moving Average Analysis](images/04_moving_average.png)
+측정 오류 여부를 확인하지 않은 상태에서 이러한 데이터를 삭제하면 장기적인 기온 변화 추세가 왜곡될 가능성이 있다.
 
-### Interpretation
-The daily series shows substantial variation.
-The 30-day SMA retains a strong annual seasonal cycle.
-The 365-day SMA is smoother and shows a visually higher level
-in recent years than in some earlier periods.
+따라서 이번 분석에서는 통계적으로 탐지된 이상치를 검토 대상으로 표시하되, 별도의 측정 오류 근거가 없는 한 원본 관측값을 유지하였다.
 
-These visual observations are not sufficient to establish
-a statistically significant warming trend.
-A quantitative trend test would be needed for that conclusion.
+---
 
-### Limitations
-- Moving averages introduce overlapping observations.
-- The first 29 and 364 observations lack full-window SMA values.
-- The 2026 calendar year is incomplete.
-- Extreme but potentially genuine temperature observations remain included.
+## 10. 이동평균 분석
 
-## 11. Seasonal Decomposition Analysis
+### 분석 목적
 
-### Purpose
-Separate long-term temperature changes, recurring seasonal
-patterns, and irregular fluctuations.
+단기적인 기온 변동을 완화하여 장기적인 기온 변화 패턴을 확인한다.
 
-### Method
-- Source: Changwon daily mean temperature observations.
-- Aggregation: Monthly mean temperature (321 months).
-- Period: January 2000 through September 2026.
-- Model: Additive seasonal decomposition.
-- Seasonal period: 12 months.
-- Incomplete October 2026 excluded.
-- No incomplete or missing months detected.
-- Trend endpoints are extrapolated estimates.
+### 분석 방법
 
-### Results
+- **30일 단순이동평균(SMA):** 일별 기온의 단기적인 변동을 완화한다.
+- **365일 단순이동평균(SMA):** 연간 계절적 변동을 완화하여 장기적인 변화 양상을 관찰한다.
+- 30일 및 365일 이동평균은 각각 해당 기간의 관측값이 모두 확보된 경우에 계산하였다.
+- 원본 일별 관측값과 통계적 이상치 후보는 삭제하지 않고 유지하였다.
 
-![Seasonal Decomposition](images/05_seasonal_decomposition.png)
+### 분석 결과
 
-### Interpretation
-1. Observed: A strong annual temperature cycle is visible.
-2. Trend: The estimated trend fluctuates over time,
-   with a noticeable rise in the recent period.
-3. Seasonal: A recurring 12-month temperature cycle
-   is clearly identified.
-4. Residual: Both positive and negative irregular
-   deviations remain after decomposition.
+- **전체 일별 관측값:** 9,788개
+- **유효한 30일 이동평균:** 9,759개
+- **유효한 365일 이동평균:** 9,424개
 
-### Limitations
-- Decomposition does not establish causal relationships.
-- Statistical significance of warming was not tested.
-- Endpoint trend values are partly extrapolated.
-- The additive model assumes a stable seasonal pattern.
-- Residual extremes do not automatically indicate errors.
+**2026년 10월 18일 기준**
 
-## 12. Period and Aggregation Comparison
-
-### Purpose
-Test whether temperature trend interpretation changes
-when selecting different analysis periods or time units.
-
-### Method
-- Source: Changwon daily mean temperature data.
-- Period: 2000-2025, excluding incomplete 2026.
-- Aggregation: Monthly and yearly arithmetic means.
-- Trend: Linear regression using numpy.polyfit.
-- Slope unit: Degrees Celsius per decade.
-
-### Period Comparison
-
-| Period | Trend (C/decade) |
+| 구분 | 기온 |
 |---|---:|
-| 2000-2012 | -0.443 |
-| 2013-2025 | +0.649 |
-| 2000-2025 | +0.147 |
+| 일평균기온 | 21.90℃ |
+| 30일 이동평균 | 20.99℃ |
+| 365일 이동평균 | 15.96℃ |
 
-### Aggregation Comparison
+![이동평균 분석](images/04_moving_average.png)
 
-| Metric | Monthly | Yearly |
+### 결과 해석
+
+일별 기온 시계열에서는 큰 폭의 기온 변동이 나타난다.
+
+30일 이동평균은 이러한 단기 변동을 완화하면서도 연간 계절 주기를 비교적 뚜렷하게 보여준다.
+
+365일 이동평균은 상대적으로 완만한 곡선을 나타내며, 일부 과거 기간과 비교했을 때 최근 연도의 기온 수준이 시각적으로 높게 나타난다.
+
+다만 이러한 시각적 관찰만으로 통계적으로 유의미한 온난화 추세를 확정할 수는 없다. 이를 판단하려면 별도의 정량적 추세 검정이 필요하다.
+
+### 분석의 한계
+
+- 이동평균은 서로 겹치는 관측값을 사용하므로 연속된 결과가 독립적이지 않다.
+- 최초 29개 및 364개 관측값은 각각 30일 및 365일의 전체 계산 구간이 확보되지 않아 이동평균값이 존재하지 않는다.
+- 2026년은 연간 데이터가 완성되지 않은 상태이다.
+- 통계적으로 극단적인 값이라도 실제 관측값일 가능성이 있는 기온 데이터는 분석에 포함하였다.
+
+---
+
+## 11. 계절성 분해 분석
+
+### 분석 목적
+
+장기적인 기온 변화 추세와 반복적인 계절 패턴, 불규칙한 변동을 구분하여 분석한다.
+
+### 분석 방법
+
+- **분석 데이터:** 창원 지역 일평균기온 관측값
+- **집계 방식:** 일별 데이터를 월평균기온으로 집계
+- **분석 자료:** 총 321개월
+- **분석 기간:** 2000년 1월~2026년 9월
+- **분석 모델:** 가법 계절성 분해(Additive Seasonal Decomposition)
+- **계절 주기:** 12개월
+- **데이터 처리:** 자료가 완성되지 않은 2026년 10월은 제외하였다.
+- 월별 자료에서 누락되거나 불완전한 월은 발견되지 않았다.
+- 추세 성분의 양 끝 구간은 외삽으로 추정된 값을 포함한다.
+
+### 분석 결과
+
+![계절성 분해 분석](images/05_seasonal_decomposition.png)
+
+### 결과 해석
+
+**1. 관측값(Observed)**
+
+창원 지역 기온에서 뚜렷한 연간 계절 주기가 확인된다.
+
+**2. 추세 성분(Trend)**
+
+추정된 추세 성분은 시간에 따라 변동하며, 최근 구간에서 상승하는 양상이 관찰된다.
+
+**3. 계절 성분(Seasonal)**
+
+12개월을 주기로 반복되는 기온 변화 패턴이 뚜렷하게 나타난다.
+
+**4. 잔차 성분(Residual)**
+
+추세와 계절성을 분리한 이후에도 양수 및 음수 방향의 불규칙한 변동이 남아 있다.
+
+### 분석의 한계
+
+- 계절성 분해 결과만으로 기온 변화의 인과관계를 설명할 수 없다.
+- 기온 상승 추세에 대한 통계적 유의성 검정은 수행하지 않았다.
+- 추세 성분의 양 끝부분에는 외삽으로 추정한 값이 일부 포함되어 있다.
+- 가법 모델은 계절적 변동 패턴이 시간에 따라 비교적 일정하다고 가정한다.
+- 잔차에서 극단적인 값이 나타나더라도 이를 곧바로 측정 오류로 판단할 수 없다.
+
+---
+
+## 12. 기간별 추세 및 집계 단위 비교
+
+### 분석 목적
+
+서로 다른 분석 기간과 데이터 집계 단위가 기온 변화 추세의 해석에 어떤 영향을 미치는지 비교한다.
+
+### 분석 방법
+
+- **분석 데이터:** 창원 지역 일평균기온 관측 자료
+- **기간별 비교:** 2000~2012년, 2013~2025년, 2000~2025년
+- **추세 추정:** NumPy의 `polyfit`을 이용한 선형회귀
+- **기울기 단위:** ℃/10년
+- **집계 단위 비교:** 월평균기온과 연평균기온
+
+### 기간별 기온 추세 비교
+
+| 분석 기간 | 기온 변화 추세(℃/10년) |
+|---|---:|
+| 2000~2012년 | -0.443 |
+| 2013~2025년 | +0.649 |
+| 2000~2025년 | +0.147 |
+
+2000~2012년에는 음의 기울기가, 2013~2025년에는 양의 기울기가 추정되었다.
+
+전체 기간의 추세는 +0.147℃/10년으로 최근 기간보다 작은 값을 나타냈다.
+
+### 집계 단위별 비교
+
+| 비교 항목 | 월별 집계 | 연도별 집계 |
 |---|---:|---:|
-| Number of observations | 312 | 26 |
-| Standard deviation (C) | 8.323 | 0.467 |
+| 관측값 수 | 312개 | 26개 |
+| 표준편차(℃) | 8.323 | 0.467 |
 
-### Visualization
+월별 평균기온에서는 계절에 따른 변화가 크게 나타나지만, 연도별 평균기온에서는 계절적 변동이 완화된다.
 
-![Period and Aggregation Comparison](images/06_period_aggregation.png)
+이러한 표준편차 차이는 집계 단위가 서로 다른 변동 특성을 나타낸다는 점을 보여준다.
 
-### Interpretation
-The estimated trend changes with the selected period.
-The 2000-2012 slope is negative, while the
-2013-2025 slope is positive.
+### 분석 결과 시각화
 
-The full-period slope is smaller than the recent-period
-slope. Therefore, conclusions about warming rates are
-sensitive to the time interval selected.
+![기간별 추세 및 집계 단위 비교](images/06_period_aggregation.png)
 
-Monthly aggregation retains strong seasonal variations.
-Yearly aggregation reduces seasonal fluctuations.
+### 결과 해석
 
-This comparison provides a counterexample to interpreting
-one selected period as representative of all periods.
+**1. 분석 기간에 따른 추세 차이**
 
-### Limitations
-- Trend significance and uncertainty were not tested.
-- Shorter periods may be sensitive to unusual years.
-- Different aggregation units measure different variability.
-- These results do not demonstrate causes of warming.
+2000~2012년에는 기온의 하락 방향이, 2013~2025년에는 상승 방향이 추정되었다.
 
-## 13. Data Analysis Pipeline
+2000~2025년 전체 기간의 추세는 최근 기간의 추세보다 작았다.
 
-### Overview
-The analysis follows four main stages:
-Data Loading -> Data Validation -> Time-Series Analysis -> Visualization.
+따라서 특정 기간에서 관찰된 변화 방향과 크기를 전체 기간에 그대로 적용해서는 안 된다.
 
-### Stage 1. Data Loading
-- Source: Korea Meteorological Administration.
-- File: data/changwon_temp.csv
-- Encoding: CP949.
-- Header handling: skiprows=7.
-- Dataset: 9,788 daily observations.
-- Variables: Date, station, mean/minimum/maximum temperature.
+**2. 집계 단위에 따른 변동성 차이**
 
-### Stage 2. Data Validation and Cleaning
-- Converted the date column to datetime.
-- Standardized column names.
-- Confirmed zero duplicate dates.
-- Mean temperature missing values: 0.
-- Minimum temperature missing values: 1.
-- Maximum temperature missing values: 1.
-- Temperature-order logical errors: 0.
-- Monthly IQR outlier candidates: 75.
-- Outlier candidates were retained because extreme
-  temperatures may represent real weather events.
-- Original observations were preserved for mean
-  temperature analysis.
+월별 집계에서는 강한 계절적 변동이 나타나지만, 연도별 집계에서는 이러한 변동이 상당 부분 완화된다.
 
-### Stage 3. Time-Series Analysis
-1. Aggregated daily observations into monthly and yearly means.
-2. Applied 30-day and 365-day moving averages.
-3. Applied additive seasonal decomposition with period=12.
-4. Compared linear trends for:
-   - 2000-2012
-   - 2013-2025
-   - 2000-2025
-5. Compared monthly and yearly aggregation results.
-6. Excluded incomplete periods when full-year
-   or full-month comparisons were required.
+동일한 기온 자료라도 집계 단위에 따라 강조되는 데이터의 특성이 달라진다.
 
-### Stage 4. Visualization and Interpretation
-- images/01_yearly_trend.png
-- images/02_monthly_pattern.png
-- images/03_heatmap.png
-- images/04_moving_average.png
-- images/05_seasonal_decomposition.png
-- images/06_period_aggregation.png
+**3. 분석 결과의 의미**
 
-The figures illustrate long-term temperature patterns,
-annual seasonality, statistical decomposition,
-and sensitivity to the analysis period.
+이 비교는 특정 기간의 기온 변화 추세가 모든 기간을 대표한다고 가정하기 어렵다는 점을 보여준다.
 
-### Reproducibility
-- Main notebook: changwon_analysis.ipynb
-- Report: REPORT.md
-- Original dataset: data/changwon_temp.csv
-- Analysis tools: pandas, numpy, matplotlib,
-  seaborn, and statsmodels.
+장기적인 기온 변화를 해석할 때는 분석 기간과 집계 단위를 함께 고려해야 한다.
 
-### Important Notes
-Statistical outlier detection does not prove data errors.
-Linear trend slopes were calculated without significance tests.
-The incomplete 2026 calendar year was excluded
-from full-year comparisons.
+### 분석의 한계
+
+- 기온 변화 추세의 통계적 유의성과 불확실성은 별도로 검정하지 않았다.
+- 짧은 분석 기간에서는 특정 연도의 이례적인 기온 변화가 추세 추정에 큰 영향을 미칠 수 있다.
+- 월별 및 연도별 집계는 서로 다른 시간 규모의 변동성을 나타낸다.
+- 본 분석 결과만으로 기온 변화의 원인을 설명할 수는 없다.
+
+---
+
+## 13. 데이터 분석 파이프라인
+
+### 분석 과정 개요
+
+본 프로젝트는 창원 지역의 기상 관측 데이터를 활용하여 장기 기온 변화와 계절적 특성을 분석하였다.
+
+분석 과정은 데이터 불러오기, 데이터 품질 검증 및 정제, 시계열 분석, 시각화 및 결과 해석의 네 단계로 구성하였다.
+
+### 1단계. 데이터 불러오기
+
+- **원본 데이터:** `data/changwon_temp.csv`
+- Python의 pandas 라이브러리를 이용하여 CSV 파일을 불러왔다.
+- 날짜 정보를 날짜형 데이터로 변환하였다.
+- 분석에 필요한 기온 변수와 관측 기간을 확인하였다.
+
+### 2단계. 데이터 검증 및 정제
+
+- 전체 관측값 9,788개를 확인하였다.
+- 평균기온 결측치 0개, 최저기온 결측치 1개, 최고기온 결측치 1개를 확인하였다.
+- 최저기온 ≤ 평균기온 ≤ 최고기온의 논리적 관계를 검증하였다.
+- 세 기온 값이 모두 존재하는 관측값에서 논리적 오류는 발견되지 않았다.
+- 월별 IQR 방법을 이용하여 통계적 이상치 후보 75개를 확인하였다.
+- 극단적인 기온이 실제 기상 현상일 가능성을 고려하여 이상치 후보를 자동으로 삭제하지 않았다.
+- 평균기온 분석에서는 원본 관측값을 유지하였다.
+
+### 3단계. 시계열 분석
+
+1. 일별 기온 데이터를 월평균 및 연평균기온으로 집계하였다.
+2. 30일 및 365일 이동평균을 계산하였다.
+3. 12개월 주기의 가법 계절성 분해를 적용하였다.
+4. 다음 세 기간의 선형 추세를 비교하였다.
+   - 2000~2012년
+   - 2013~2025년
+   - 2000~2025년
+5. 월별 및 연도별 집계 결과를 비교하였다.
+6. 완전한 연도 또는 월 단위 비교가 필요한 경우 불완전한 관측 기간을 제외하였다.
+
+### 4단계. 분석 결과 시각화 및 해석
+
+다음 여섯 가지 그래프를 작성하였다.
+
+1. `images/01_yearly_trend.png` : 연도별 평균기온 추세
+2. `images/02_monthly_pattern.png` : 월별 평균기온 패턴
+3. `images/03_heatmap.png` : 연도·월별 기온 히트맵
+4. `images/04_moving_average.png` : 이동평균 분석
+5. `images/05_seasonal_decomposition.png` : 계절성 분해 분석
+6. `images/06_period_aggregation.png` : 기간별 추세 및 집계 단위 비교
+
+이러한 시각화 자료를 통해 장기적인 기온 변화, 연간 계절 주기, 추세와 계절성의 분리, 분석 기간에 따른 추세 차이를 살펴보았다.
+
+### 분석 결과의 재현성
+
+- **분석 노트북:** `changwon_analysis.ipynb`
+- **분석 보고서:** `REPORT.md`
+- **원본 데이터:** `data/changwon_temp.csv`
+- **주요 라이브러리:** pandas, numpy, matplotlib, seaborn, statsmodels
+
+프로젝트에 포함된 원본 데이터와 분석 노트북을 이용하여 분석 과정을 다시 실행할 수 있도록 구성하였다.
+
+### 분석 시 주의사항
+
+- 통계적 이상치 탐지 결과만으로 측정 오류가 입증되는 것은 아니다.
+- 선형 추세의 기울기는 계산하였으나 통계적 유의성 검정은 수행하지 않았다.
+- 2026년은 관측 자료가 완성되지 않은 연도이므로 완전한 연도끼리 비교하는 분석에서는 제외하였다.
+- 기온의 변화 추세가 관찰되더라도 본 분석만으로 변화의 원인을 단정할 수 없다.
